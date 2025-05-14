@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>WiFiパンチ！</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="320" height="320" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+      <div id="unity-footer">
+        <!-- <div id="unity-logo-title-footer"></div> -->
+        <!-- <div id="unity-fullscreen-button"></div> -->
+        <!-- <div id="unity-build-title">WiFiPunchGame</div> -->
+      </div>
+      <!-- モバイル用追加 -->
+      <meta
+        name="viewport"
+        content="width=480, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      />
+      <!-- モバイル用追加 -->
+    </div>
+
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+
+      // 表示サイズに応じて canvas サイズを切り替える
+      var isLargeScreen = window.innerWidth >= 768;
+      const canvasWidth = isLargeScreen ? 540 : 320;
+      const canvasHeight = isLargeScreen ? 540 : 320;
+
+      canvas.width = canvasWidth; // Unity内部で使う解像度
+      canvas.height = canvasHeight;
+      canvas.style.width = `${canvasWidth}px`; // 表示サイズ
+      canvas.style.height = `${canvasHeight}px`;
+      canvas.style.margin = "0 auto";
+      canvas.style.position = "relative";
+
+      // 警告バナー関数
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length
+            ? "block"
+            : "none";
+        }
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == "error") div.style = "background: red; padding: 10px;";
+        else {
+          if (type == "warning")
+            div.style = "background: yellow; padding: 10px;";
+          setTimeout(function () {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      // Unityロード設定
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WebGL.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data",
+        frameworkUrl: buildUrl + "/WebGL.framework.js",
+        codeUrl: buildUrl + "/WebGL.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "WiFiPunchGame",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
+      };
+
+      // ローディングバー表示
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      // Unityインスタンス作成
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width =
+            100 * progress + "%";
+        })
+          .then((unityInstance) => {
+            document.querySelector("#unity-loading-bar").style.display = "none";
+          })
+          .catch((message) => {
+            alert(message);
+          });
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
