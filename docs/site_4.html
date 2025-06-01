@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WiFiPunchGame</title>
+    <link rel="stylesheet" href="TemplateData/style.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #000;
+      }
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+
+    <script>
+      function unityShowBanner(msg, type) {
+        const w = document.getElementById("unity-warning");
+        const d = document.createElement("div");
+        d.innerHTML = msg;
+        d.style = `padding:10px;background:${
+          type === "error" ? "red" : "yellow"
+        }`;
+        w.appendChild(d);
+        if (type !== "error") setTimeout(() => w.removeChild(d), 5000);
+      }
+
+      const build = "Build";
+      const config = {
+        dataUrl: build + "/WebGL.data",
+        frameworkUrl: build + "/WebGL.framework.js",
+        codeUrl: build + "/WebGL.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "WiFiPunchGame",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
+      };
+
+      document.getElementById("unity-loading-bar").style.display = "block";
+      const s = document.createElement("script");
+      s.src = build + "/WebGL.loader.js";
+      s.onload = () => {
+        createUnityInstance(
+          document.getElementById("unity-canvas"),
+          config,
+          (p) => {
+            document.getElementById("unity-progress-bar-full").style.width =
+              p * 100 + "%";
+          }
+        )
+          .then(() => {
+            document.getElementById("unity-loading-bar").style.display = "none";
+          })
+          .catch(alert);
+      };
+      document.body.appendChild(s);
+    </script>
+  </body>
+</html>
